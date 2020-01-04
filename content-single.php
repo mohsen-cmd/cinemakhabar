@@ -1,0 +1,79 @@
+<?php
+
+$cat        = get_theme_mod( 'bulan-post-cat', 1 );
+$date       = get_theme_mod( 'bulan-post-date', 1 );
+$tag        = get_theme_mod( 'bulan-post-tag', 1 );
+$date_style = get_theme_mod( 'bulan-post-date-style', 'absolute' );
+
+
+$style = '';
+if ( $date_style == 'absolute' ) {
+	$style = esc_html( get_the_date() );
+} else {
+	$style = sprintf( __( '%s ago', 'bulan' ), human_time_diff( get_the_time( 'U' ), current_time( 'timestamp' ) ) );
+}
+?>
+<article id="post-<?php the_ID(); ?>" <?php post_class(); ?> <?php hybrid_attr( 'post' ); ?>>
+
+	<header class="entry-header">
+
+		<?php if ( 'post' == get_post_type() ) : ?>
+			<?php
+				
+				$categories_list = get_the_category_list( __( ', ', 'bulan' ) );
+				if ( $categories_list && bulan_categorized_blog() && $cat ) :
+			?>
+			<span class="cat-links" <?php hybrid_attr( 'entry-terms', 'category' ); ?>>
+				<?php echo $categories_list; ?>
+			</span>
+			<i class="fa fa-circle"></i>
+			<?php endif;  ?>
+		<?php endif; ?>
+
+		<?php if ( $date ) : ?>
+			<time class="published" datetime="<?php echo esc_html( get_the_date( 'c' ) ); ?>" <?php hybrid_attr( 'entry-published' ); ?>><?php echo esc_html( $style ); ?></time>
+		<?php endif; ?>
+
+		<?php the_title( '<h1 class="entry-title" ' . hybrid_get_attr( 'entry-title' ) . '>', '</h1>' ); ?>
+
+	</header>
+
+	<?php if ( has_excerpt() ) : ?>
+		<div class="page-header">
+			<?php the_excerpt(); ?>
+		</div>
+	<?php endif; ?>
+
+	<div class="entry-content" <?php hybrid_attr( 'entry-content' ); ?>>
+
+		<?php the_content(); ?>
+		<?php
+			wp_link_pages( array(
+				'before' => '<div class="page-links">' . __( 'Pages:', 'bulan' ),
+				'after'  => '</div>',
+			) );
+		?>
+
+	</div>
+
+	<footer class="entry-footer">
+
+		<?php
+			$tags = get_the_tags();
+			if ( $tags && $tag ) :
+		?>
+			<span class="tag-links" <?php hybrid_attr( 'entry-terms', 'post_tag' ); ?>>
+				<?php foreach( $tags as $tag ) : ?>
+					<a href="<?php echo esc_url( get_tag_link( $tag->term_id ) ); ?>"><span>#</span><?php echo esc_attr( $tag->name ); ?></a>
+				<?php endforeach; ?>
+			</span>
+		<?php endif; ?>
+
+	</footer>
+
+	<div class="jetpack-share-like">
+		<?php if ( function_exists( 'sharing_display' ) ) { sharing_display( '', true ); } ?>
+		<?php if ( class_exists( 'Jetpack_Likes' ) ) { $custom_likes = new Jetpack_Likes; echo $custom_likes->post_likes( '' ); } ?>
+	</div>
+
+</article>
